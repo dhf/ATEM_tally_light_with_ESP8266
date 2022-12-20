@@ -20,6 +20,7 @@
 
 // #define DEBUG_LED_STRIP
 #define FASTLED_ALLOW_INTERRUPTS 0
+#define LED_ANODE 0 // 0 = cathode LED, 1 = anode LED
 
 //Include libraries:
 #if ESP32
@@ -384,42 +385,50 @@ void setLED2(uint8_t color) {
 
 //Set the color of a LED using the given pins
 void setLED(uint8_t color, int pinRed, int pinGreen, int pinBlue) {
+#if LED_ANODE
+  uint8_t ledOff = 1;
+  uint8_t ledOn = 0;
+ #else
+  uint8_t ledOff = 0;
+  uint8_t ledOn = 1;
+ #endif
+
 #if ESP32
     switch (color) {
         case LED_OFF:
-            digitalWrite(pinRed, 0);
-            digitalWrite(pinGreen, 0);
-            digitalWrite(pinBlue, 0);
+            digitalWrite(pinRed, ledOff);
+            digitalWrite(pinGreen, ledOff);
+            digitalWrite(pinBlue, ledOff);
             break;
         case LED_RED:
-            digitalWrite(pinRed, 1);
-            digitalWrite(pinGreen, 0);
-            digitalWrite(pinBlue, 0);
+            digitalWrite(pinRed, ledOn);
+            digitalWrite(pinGreen, ledOff);
+            digitalWrite(pinBlue, ledOff);
             break;
         case LED_GREEN:
-            digitalWrite(pinRed, 0);
-            digitalWrite(pinGreen, 1);
-            digitalWrite(pinBlue, 0);
+            digitalWrite(pinRed, ledOff);
+            digitalWrite(pinGreen, ledOn);
+            digitalWrite(pinBlue, ledOff);
             break;
         case LED_BLUE:
-            digitalWrite(pinRed, 0);
-            digitalWrite(pinGreen, 0);
-            digitalWrite(pinBlue, 1);
+            digitalWrite(pinRed, ledOff);
+            digitalWrite(pinGreen, ledOff);
+            digitalWrite(pinBlue, ledOn);
             break;
         case LED_YELLOW:
-            digitalWrite(pinRed, 1);
-            digitalWrite(pinGreen, 1);
-            digitalWrite(pinBlue, 0);
+            digitalWrite(pinRed, ledOn);
+            digitalWrite(pinGreen, ledOn);
+            digitalWrite(pinBlue, ledOff);
             break;
         case LED_PINK:
-            digitalWrite(pinRed, 1);
-            digitalWrite(pinGreen, 0);
-            digitalWrite(pinBlue, 1);
+            digitalWrite(pinRed, ledOn);
+            digitalWrite(pinGreen, ledOff);
+            digitalWrite(pinBlue, ledOn);
             break;
         case LED_WHITE:
-            digitalWrite(pinRed, 1);
-            digitalWrite(pinGreen, 1);
-            digitalWrite(pinBlue, 1);
+            digitalWrite(pinRed, ledOn);
+            digitalWrite(pinGreen, ledOn);
+            digitalWrite(pinBlue, ledOn);
             break;
     }
 #else
@@ -432,35 +441,39 @@ void setLED(uint8_t color, int pinRed, int pinGreen, int pinBlue) {
         writeFunc = &analogWriteWrapper;
     }
 
+#if LED_ANODE
+    ledBrightness = 1 - ledBrightness;
+#endif
+
     switch (color) {
         case LED_OFF:
-            digitalWrite(pinRed, 0);
-            digitalWrite(pinGreen, 0);
-            digitalWrite(pinBlue, 0);
+            digitalWrite(pinRed, ledOff);
+            digitalWrite(pinGreen, ledOff);
+            digitalWrite(pinBlue, ledOff);
             break;
         case LED_RED:
             writeFunc(pinRed, ledBrightness);
-            digitalWrite(pinGreen, 0);
-            digitalWrite(pinBlue, 0);
+            digitalWrite(pinGreen, ledOff);
+            digitalWrite(pinBlue, ledOff);
             break;
         case LED_GREEN:
-            digitalWrite(pinRed, 0);
+            digitalWrite(pinRed, ledOff);
             writeFunc(pinGreen, ledBrightness);
-            digitalWrite(pinBlue, 0);
+            digitalWrite(pinBlue, ledOff);
             break;
         case LED_BLUE:
-            digitalWrite(pinRed, 0);
-            digitalWrite(pinGreen, 0);
+            digitalWrite(pinRed, ledOff);
+            digitalWrite(pinGreen, ledOff);
             writeFunc(pinBlue, ledBrightness);
             break;
         case LED_YELLOW:
             writeFunc(pinRed, ledBrightness);
             writeFunc(pinGreen, ledBrightness);
-            digitalWrite(pinBlue, 0);
+            digitalWrite(pinBlue, ledOff);
             break;
         case LED_PINK:
             writeFunc(pinRed, ledBrightness);
-            digitalWrite(pinGreen, 0);
+            digitalWrite(pinGreen, ledOff);
             writeFunc(pinBlue, ledBrightness);
             break;
         case LED_WHITE:
